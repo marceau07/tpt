@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #282829;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const joueurs = {
+            0: {
+                nom: "Joueur",
+                pokemons: [{}],
+                pv: 0,
+                xp: 0, // Expérience du joueur
+            }, 
+            1: {
+                nom: "IA",
+                pokemons: [{}], // On initialise un tableau contenant un tableau
+                pv: 0,
+                xp: 0, // Expérience de l'IA
+            }
+        }
+
+        // Fonction pour initialiser le jeu
+        var joueurActuel = Math.random() < 0.5 ? joueurs[0] : joueurs[1]; // Joueur qui commence aléatoirement
+        async function initJeu() {
+
+            // Appel à selectPoke() pour choisir les Pokémon
+            await selectPoke(joueurs[0], joueurs[1]);
+
+            // Boucle qui s'exécute tant que le jeu n'est pas terminé
+            while (!resultatCombat(joueurs[0], joueurs[1])) {
+                lancerCombat(joueurActuel, joueurs[0], joueurs[1]);
+                joueurActuel = (joueurActuel == joueurs[0] ? joueurs[1] : joueurs[0]);
+            }
+        }
+
+        // Fonction pour choisir les Pokémon
+        async function selectPoke(joueur, ia) {
+            try {
+                // Appel API pour récupérer l'ensemble des pokémons (sprite + nom en FR)
+                const response = await fetch("https://pokeapi.co/api/v2/pokemon?offset=20&limit=20"); // Remplacez le limit avec le nombre de Pokémon souhaité
+                const data = await response.json();
+                const pokemons = data.results;
+                let idsDisponibles = [];
+                let listePokemons = "";
+                for(i = 0 ; i < pokemons.length ; i++) {
+                    idsDisponibles.push(parseInt(pokemons[i].url.split("https://pokeapi.co/api/v2/pokemon/")[1].replace('/', '')));
+                    listePokemons += "\n(" + pokemons[i].url.split("https://pokeapi.co/api/v2/pokemon/")[1].replace('/', ') ') + pokemons[i].name;
+                }
+
+                // Sélection d'un pokémon pour chaque joueur
+                // while(!idsDisponibles.includes(joueur.pokemon.id))
+                joueur.pokemons[0].id = window.prompt("Choisir le pokémon du joueur " + listePokemons);
+                joueur.pokemons[0] = await fetch("https://pokeapi.co/api/v2/pokemon/" + joueur.pokemons[0].id).then((response) => response.json());
+                joueur.pv += joueur.pokemons[0].stats[0].base_stat;
+                ia.pokemons[0].id = window.prompt("Choisir le pokémon de l'IA " + listePokemons);
+                ia.pokemons[0] = await fetch("https://pokeapi.co/api/v2/pokemon/" + ia.pokemons[0].id).then((response) => response.json());
+                ia.pv += ia.pokemons[0].stats[0].base_stat;
+
+                
+                console.log(`${joueur.nom} a choisi le pokémon portant l'id n°${joueur.pokemons[0].id}`);
+                console.log(`${ia.nom} a choisi portant l'id n°${ia.pokemons[0].id}`);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des Pokémons:", error);
+            }
+        }
+
+        // Fonction pour lancer le combat entre les joueurs
+        function lancerCombat(joueurActuel, joueur, ia) {
+            // Définir le joueur qui joue actuellement
+            console.log(`==============================================`);
+            console.log(`C'est le tour de ${joueurActuel.nom} de jouer.`);
+            console.log(`PV joueur: ${joueur.pv}`);
+            console.log(`PV IA: ${ia.pv}`);
+            console.log(`==============================================`);
+
+            // Appeler la méthode pour gérer le choix entre la défense et l'attaque
+            choixAction(joueurActuel, joueur, ia);
+        }
+
+        // Fonction pour gérer le choix entre l'attaque et la défense
+        function choixAction(joueurActuel, joueur, ia) {
+            let action = window.prompt("Quelle action ? 0: défense, 1: attaque");
+            switch(parseInt(action)) {
+                case 0:
+                    console.log("Défense choisie");
+                    majPv(joueurActuel, 0, 1.005*joueurActuel.pokemons[0].stats[1].base_stat);
+                    break;
+                case 1:
+                default: 
+                    console.log("Attaque choisie");
+                    majPv((joueurActuel === joueur ? ia : joueur), 1, (joueurActuel === joueur ? ia : joueur).pokemons[0].stats[1].base_stat);
+                    majXp(joueurActuel);
+                    break;
+            }
+        }
+
+        // Fonction pour mettre à jour les PV du joueur
+        function majPv(joueur, action, pv) {
+            if(action === 0) joueur.pv += pv/50;
+            if(action === 1) joueur.pv -= pv/5;
+        }
+
+        // Fonction pour mettre à jour l'expérience du joueur
+        function majXp(joueur) {
+            joueur.xp += joueur.pokemons[0].base_experience;
+        }
+
+        // Fonction pour vérifier le résultat du combat
+        function resultatCombat(joueur, ia) {
+            // Vérifier les PVs des pokémons
+            if (joueur.pv <= 0 && ia.pv <= 0) {
+                console.log("Match nul !");
+                return true;
+            } else if (joueur.pv <= 0) {
+                console.log(`${ia.nom} gagne !`);
+                return true;
+            } else if (ia.pv <= 0) {
+                console.log(`${joueur.nom} gagne !`);
+                return true;
+            }
+            return false;
+        }
+
+        // Appel de la fonction d'initialisation du jeu
+        initJeu();
+    </script>
+</body>
+</html>
