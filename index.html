@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,339 +10,174 @@
             font-family: 'Pokemon_S';
             src: url('Pokemon_solid.ttf') format('truetype');
         }
+
         @font-face {
             font-family: 'Pokemon_H';
             src: url('Pokemon_hollow.ttf') format('truetype');
         }
-        .red, .hp {
-            color: #E3423A;
-            accent-color: #E3423A;
-        }
-        .disabled {
 
-        }
-        .flex {
-            display: flex;
-            justify-content: space-around;
-        }
-        #btn_start, .actions {
-            cursor: pointer;
-        }
         body {
-            background-color: #282829;
-            font-family: 'Pokemon_S';
-            color: #3A58A8;
+            font-family: 'Pokemon_S', Arial, sans-serif;
         }
+
         .container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 100vh;
+            text-align: center;
+            margin-top: 20px;
         }
-        .hidden {
-            display: none;
-        }
-        .img-selected-joueur, .img-selected-ia {
+
+        .pokemon-info {
+            display: inline-block;
+            margin: 20px;
             text-align: center;
         }
-        .custom-select-joueur, .custom-select-ia {
-            position: relative;
-            width: 200px;
-            border: 1px solid #ccc;
+
+        img {
+            max-width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
             cursor: pointer;
-            user-select: none;
-            padding: 20px;
-            background-color: #FFF;
-            text-align: left;
-            cursor: pointer;
-        }
-        .selected-option-joueur, .selected-option-ia {
-            padding: 5px;
         }
 
-        #options-pokemons-joueur, #options-pokemons-ia {
-            display: none;
-            list-style: none;
-            max-height: 20vh;
-            overflow-y: auto;
-            padding: 0;
-            margin: 0;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            border: 1px solid #ccc;
-            background-color: #fff;
+        #battleResult {
             font-size: 20px;
-        }
-
-        #options-pokemons-joueur li p, #options-pokemons-ia li p {
-            font-family: 'Pokemon_H';
-            font-weight: 600;
-            font-size: 20px;
-            letter-spacing: 0.2em;
-            line-height: 1.5;
-            text-transform: uppercase;
-            background-color: #FFCC00;
-            box-shadow: 0 0 2px #3761A8;
-            background-clip: text;
-            text-shadow: 0 0 2px #3761A8, 0 0 2px #fff;
-            padding: 8px;
-        }
-        #options-pokemons-joueur li, #options-pokemons-ia li {
-            padding: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        #options-pokemons-joueur li img, #options-pokemons-ia li img {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-
-        #options-pokemons-joueur li:hover, #options-pokemons-ia li:hover {
-            background-color: #f0f0f0;
+            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container hidden step1">
-        <div class="col">
-            <div class="img-selected-joueur"></div>
-            <div class="custom-select-joueur">
-                <span class="selected-option-joueur">Choisis ton pokémon</span>
-                <ul id="options-pokemons-joueur"></ul>
+    <div class="container">
+        <h1>Pokemon Battle</h1>
+        <div id="pokemonSelection">
+            <h2>Choose Your Pokemon</h2>
+            <div class="pokemon-options" id="pokemonOptions">
+                <!-- Options de sélection de Pokémon -->
             </div>
         </div>
-        <div class="col hidden" id="btn_start">
-            <p class="red">Jouer !</p>
+        <div class="pokemon-info" id="playerInfo">
+            <h2>Your Pokemon</h2>
+            <img src="" alt="Player Pokemon" id="playerImage">
+            <p id="playerHealth">Health: <span id="playerHP"></span></p>
         </div>
-        <div class="col">
-            <div class="img-selected-ia"></div>
-            <div class="custom-select-ia">
-                <span class="selected-option-ia">Choisis le pokémon de l'IA</span>
-                <ul id="options-pokemons-ia"></ul>
-            </div>
+        <div class="pokemon-info" id="opponentInfo">
+            <h2>Opponent Pokemon</h2>
+            <img src="" alt="Opponent Pokemon" id="opponentImage">
+            <p id="opponentHealth">Health: <span id="opponentHP"></span></p>
         </div>
+        <button id="attackButton">Attack</button>
+        <p id="battleResult"></p>
     </div>
-    <div class="container hidden step2">
-        <div class="col">
-            <div class="pokemon-joueur"></div>
-            <progress class="hp" id="hp_joueur"></progress>
-            <progress class="xp" id="xp_joueur" value="0"></progress>
-            <div class="flex">
-                <span class="actions" id="action-defense" onclick="choixAction(joueurActuel, joueurs[0], joueurs[1], 'défense');">Défense</span>
-                <span class="actions red" id="action-attaque" onclick="choixAction(joueurActuel, joueurs[0], joueurs[1], 'attaque');">Attaque</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="pokemon-ia"></div>
-            <progress class="hp" id="hp_ia"></progress>
-        </div>
-    </div>
-    <div class="container hidden step3">
-        <div class="col">
-            <span id="resultats"></span>
-        </div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        const joueursNoms = ['joueur', 'ia'];
-        document.addEventListener('DOMContentLoaded', async function () {
-            for(const joueur of joueursNoms) {
-                chargerPokemons(joueur);
-            }
-            document.querySelector('.step1').classList.remove('hidden');
-            // Appel à selectPoke() pour choisir les Pokémon
-            await selectPoke(joueurs[0], joueurs[1]);
-        });
+        const apiUrl = 'https://pokeapi.co/api/v2/pokemon/';
+        const maxPokemonId = 151; // Change to adjust the range of Pokémon
 
-        document.querySelector('#btn_start').addEventListener('click', function() {
-            document.querySelector('.step1').classList.add('hidden');
-            document.querySelector('.step2').classList.remove('hidden');
-            
-            // Appel de la fonction d'initialisation du jeu
-            initJeu();
-        });
+        let playerPokemon = {};
+        let opponentPokemon = {};
 
-        function chargerPokemons(joueur) {
-            const customSelect = document.querySelector('.custom-select-' + joueur);
-            const selectedOption = customSelect.querySelector('.selected-option-' + joueur);
-            const options = customSelect.querySelector('#options-pokemons-' + joueur);
+        // Function to load a random Pokémon
+        function loadRandomPokemon() {
+            const randomId = Math.floor(Math.random() * maxPokemonId) + 1;
+            const url = `${apiUrl}${randomId}/`;
 
-            // Affiche/masque les options lorsque le composant est cliqué
-            selectedOption.addEventListener('click', function () {
-                options.style.display = options.style.display === 'block' ? 'none' : 'block';
-            });
+            $.get(url, function (data) {
+                const pokemon = {
+                    id: data.id,
+                    name: data.name,
+                    image: data.sprites.front_default,
+                    hp: data.stats[0].base_stat
+                };
 
-            // Met à jour l'option sélectionnée lorsque l'utilisateur clique sur une option
-            options.addEventListener('click', async function (e) {
-                const clickedOption = e.target.closest('li');
-                if (clickedOption) {
-                    const optionValue = clickedOption.querySelector('img').alt;
-                    const createElementImg = document.createElement('img');
-                    createElementImg.alt = clickedOption.querySelector('img').alt;
-                    createElementImg.src = clickedOption.querySelector('img').src;
-                    const createElementImg2 = createElementImg.cloneNode(true);
-                    document.querySelector('.img-selected-' + joueur).appendChild(createElementImg);
-                    document.querySelector('.pokemon-' + joueur).appendChild(createElementImg2);
-                    if(joueur === "joueur") {
-                        joueurs[0].pokemons[0] = await fetch("https://pokeapi.co/api/v2/pokemon/" + optionValue).then((response) => response.json());
-                        joueurs[0].pv = joueurs[0].pokemons[0].stats[0].base_stat;
-                        document.querySelector("#hp_joueur").setAttribute("value", joueurs[0].pokemons[0].stats[0].base_stat);
-                        document.querySelector("#xp_joueur").setAttribute("max", 1500);
-                    } else if(joueur === "ia") {
-                        joueurs[1].pokemons[0] = await fetch("https://pokeapi.co/api/v2/pokemon/" + optionValue).then((response) => response.json());
-                        joueurs[1].pv = joueurs[1].pokemons[0].stats[0].base_stat;
-                        document.querySelector("#hp_ia").setAttribute("value", joueurs[1].pokemons[0].stats[0].base_stat);
-                    }
-                    selectedOption.textContent = clickedOption.textContent;
-                    options.style.display = 'none';
-
-                    for(const i of joueursNoms) {
-                        if(document.querySelector('.img-selected-' + i + ' img')) {
-                            document.querySelector('#btn_start').classList.remove("hidden");
-                        } else {
-                            document.querySelector('#btn_start').classList.add("hidden");
-                        }
-                    }
+                if (!playerPokemon.id) {
+                    playerPokemon = pokemon;
+                    updatePokemonInfo(playerPokemon, 'player');
+                    loadRandomPokemon();
+                } else {
+                    opponentPokemon = pokemon;
+                    updatePokemonInfo(opponentPokemon, 'opponent');
                 }
             });
         }
-    </script>
-    <script>
-        const joueurs = {
-            0: {
-                nom: "joueur",
-                pokemons: [{}],
-                pv: 0,
-                xp: 0, // Expérience du joueur
-            }, 
-            1: {
-                nom: "ia",
-                pokemons: [{}], // On initialise un tableau contenant un tableau
-                pv: 0,
-                xp: 0, // Expérience de l'IA
-            }
+
+        // Function to update Pokemon info on the UI
+        function updatePokemonInfo(pokemon, player) {
+            const pokemonInfoElement = $('#' + player + 'Info');
+            pokemonInfoElement.find('img').attr('src', pokemon.image);
+            pokemonInfoElement.find('#' + player + 'HP').text(pokemon.hp);
         }
 
-        // Fonction pour initialiser le jeu
-        var joueurActuel = joueurs[0];
-        var tourJoue = false;
-        function initJeu() {
-            // Boucle qui s'exécute tant que le jeu n'est pas terminé
-            while (!resultatCombat(joueurs[0], joueurs[1])) {
-                tourJoue = false;
-                lancerCombat(joueurActuel, joueurs[0], joueurs[1]);
-                if(tourJoue) joueurActuel = (joueurActuel == joueurs[0] ? joueurs[1] : joueurs[0]);
-            }
-        }
+        // Function to load available Pokemon options for selection
+        function loadPokemonOptions() {
+            const pokemonOptionsElement = $('#pokemonOptions');
+            pokemonOptionsElement.empty();
 
-        // Fonction pour choisir les Pokémon
-        async function selectPoke(joueur, ia) {
-            try {
-                // Appel API pour récupérer l'ensemble des pokémons (sprite + nom en FR)
-                const response = await fetch("https://pokeapi.co/api/v2/pokemon?offset=20&limit=20"); // Remplacez le limit avec le nombre de Pokémon souhaité
-                const data = await response.json();
-                const pokemons = data.results;
-                let listePokemons = "";
-                const parser = new DOMParser();
-                const ulPokemonsJoueurs = document.querySelector('#options-pokemons-joueur');
-                const ulPokemonsIA = document.querySelector('#options-pokemons-ia');
-                for(i = 0 ; i < pokemons.length ; i++) {
-                    var pokemon = await fetch(pokemons[i].url).then((result) => result.json());
-                    var noms = await fetch("https://pokeapi.co/api/v2/pokemon-species/" + pokemons[i].url.split("https://pokeapi.co/api/v2/pokemon/")[1].replace('/', '')).then((result) => result.json());                    
-                    ulPokemonsJoueurs.appendChild(genererNoeud(noms.names[4].name, pokemons[i].name, pokemon.sprites.front_default));
-                    ulPokemonsIA.appendChild(genererNoeud(noms.names[4].name, pokemons[i].name, pokemon.sprites.front_default));
-                }
-            } catch (error) {
-                console.error("Erreur lors de la récupération des Pokémons:", error);
-            }
-        }
+            for (let i = 0; i < 3; i++) { // Load 3 random Pokémon options
+                const randomId = Math.floor(Math.random() * maxPokemonId) + 1;
+                const optionUrl = `${apiUrl}${randomId}/`;
 
-        function genererNoeud(nomFr, nomEn, img) {
-            var createElement = document.createElement('li');
-            var spanCreated = document.createElement('p');
-            spanCreated.textContent = nomFr;
-            var imgElement = document.createElement('img');
-            imgElement.src = img;
-            imgElement.alt = nomEn;
-            createElement.prepend(imgElement);
-            createElement.append(spanCreated);
-            return createElement;
-        }
+                $.get(optionUrl, function (data) {
+                    const pokemon = {
+                        id: data.id,
+                        name: data.name,
+                        image: data.sprites.front_default
+                    };
 
-        function lancerCombat(joueurActuel, joueur, ia) {
-            if(joueurActuel.nom === "ia") {
-                choixAction(joueurActuel, joueur, ia, (Math.random() ? "attaque" : "défense"));
-            } else {
-                document.querySelector('#action-defense').addEventListener('click', async function() {
-                    await choixAction(joueurActuel, joueurs[0], joueurs[1], "défense");
-                    tourJoue = true;
+                    const option = $('<div class="pokemon-option">')
+                        .append($('<img>').attr('src', pokemon.image))
+                        .append($('<p>').text(pokemon.name))
+                        .click(function () {
+                            playerPokemon = pokemon;
+                            updatePokemonInfo(playerPokemon, 'player');
+                            $('#startButton').prop('disabled', false);
+                        });
+
+                    pokemonOptionsElement.append(option);
                 });
-                document.querySelector('#action-attaque').addEventListener('click', async function() {
-                    await choixAction(joueurActuel, joueurs[0], joueurs[1], "attaque");
-                    tourJoue = true;
-                });
-            }            
-        }
-
-        // Fonction pour gérer le choix entre l'attaque et la défense
-        function choixAction(joueurActuel, joueur, ia, action) {
-            document.querySelectorAll('.actions').forEach((action) => action.classList.toggle('disabled'));
-            switch(action) {
-                case "défense":
-                    majPv(joueurActuel, 0, 1.005*joueurActuel.pokemons[0].stats[1].base_stat);
-                    break;
-                case "attaque":
-                default: 
-                    majPv((joueurActuel === joueur ? ia : joueur), 1, (joueurActuel === joueur ? ia : joueur).pokemons[0].stats[1].base_stat);
-                    majXp(joueurActuel);
-                    break;
             }
-            // if(joueurActuel.nom === "joueur") tourJoue = true;
-            // if(joueurActuel.nom === "ia") tourJoue = false;
         }
 
-        // Fonction pour mettre à jour les PV du joueur
-        function majPv(joueur, action, pv) {
-            if(action === 0) joueur.pv += pv/50;
-            if(action === 1) joueur.pv -= pv/5;
-            
-            document.querySelector('#hp_' + joueur.nom).setAttribute('value', joueur.pv);
-        }
-        
-        // Fonction pour mettre à jour l'expérience du joueur
-        function majXp(joueur) {
-            joueur.xp += joueur.pokemons[0].base_experience;
-            if(joueur.nom === "joueur") document.querySelector('#xp_joueur').setAttribute('value', joueur.xp);
-        }
+        // Function to perform an attack
+        function performAttack() {
+            const playerDamage = Math.floor(Math.random() * 10) + 1;
+            const opponentDamage = Math.floor(Math.random() * 10) + 1;
 
-        // Fonction pour vérifier le résultat du combat
-        function resultatCombat(joueur, ia) {
-            let result = false;
-            let message = document.createElement('p');
-            // Vérifier les PVs des pokémons
-            if (joueur.pv <= 0 && ia.pv <= 0) {
-                document.querySelector('.step3').classList.remove('hidden');
-                document.querySelector('#resultats').outerHTML(`Match nul !`);
-                message.innerText = "Match nul !";
-                result = true;
-            } else if (joueur.pv <= 0) {
-                document.querySelector('.step3').classList.remove('hidden');
-                message.innerText = `${ia.nom} gagne !`;
-                result = true;
-            } else if (ia.pv <= 0) {
-                message.innerText = `${joueur.nom} gagne !`;
-                result = true;
+            playerPokemon.hp -= opponentDamage;
+            opponentPokemon.hp -= playerDamage;
+
+            updatePokemonInfo(playerPokemon, 'player');
+            updatePokemonInfo(opponentPokemon, 'opponent');
+
+            if (playerPokemon.hp <= 0) {
+                $('#battleResult').text('Perdu!');
+                $('#battleResult').css('color', 'red');
+                $('#attackButton').prop('disabled', true);
+            } else if (opponentPokemon.hp <= 0) {
+                $('#battleResult').text('Gagné!');
+                $('#battleResult').css('color', 'green');
+                $('#attackButton').prop('disabled', true);
             }
-
-            document.querySelector('#resultats').appendChild(message);
-
-            if(result) document.querySelector('.step3').classList.remove('hidden');
-
-            return result;
         }
+
+        $(document).ready(function () {
+            loadRandomPokemon();
+            loadPokemonOptions();
+
+            $('#startButton').click(function () {
+                $('#pokemonSelection').hide();
+                $('#attackButton').prop('disabled', false);
+            });
+
+            $('#attackButton').click(function () {
+                performAttack();
+            });
+        });
     </script>
 </body>
+
 </html>
